@@ -380,6 +380,28 @@ namespace SplitAndMerge
         }
     }
 
+    class SwRatingTable : ParserFunction
+    {
+        // XXX 1つのRandomizerを参照してかつ差し替えられるようにする
+        private Random randomizer = new Random();
+
+        protected override double evaluate(string data, ref int from)
+        {
+            // XXｘ 可変長の引数とか変な書式とか処理したいねん
+            double arg = Parser.loadAndCalculate(data, ref from, Parser.END_ARG);
+            var n = randomizer.Roll(6) + randomizer.Roll(6);
+            // XXX レーティング表を参照しようと思ったけれどピンゾロをどう処理すればいいんだぜ、例外でも放るのか？
+            return n;
+        }
+    }
+    static class RandomExtension
+    {
+        public static int Roll(this Random rand, int d)
+        {
+            return rand.Next(1, d + 1);
+        }
+    }
+
     class Program
     {
         static void calculate(string expr, double expected)
@@ -403,6 +425,7 @@ namespace SplitAndMerge
             ParserFunction.addFunction("sin", new SinFunction());
             ParserFunction.addFunction("abs", new AbsFunction());
             ParserFunction.addFunction("sqrt", new SqrtFunction());
+            ParserFunction.addFunction("r", new SwRatingTable());
 
             calculate("(((-5.5)))", (((-5.5))));
             calculate("1-2", 1 - 2);
@@ -430,6 +453,9 @@ namespace SplitAndMerge
             roll("1d100");
             roll("2d6+5");
             roll("2d6+2d6");
+            // XXX
+            roll("r(0)");
+            roll("r(10)");
 
             Console.ReadKey();
         }
